@@ -98,7 +98,7 @@ const HomePage: React.FC<Props> = (props) => {
         }}
         viewState={viewState}
         onViewStateChange={(e: any) => {
-          console.log("\n", `e.viewState = `, e.viewState, "\n");
+          // console.log("\n", `e.viewState = `, e.viewState, "\n");
           setViewState({
             ...e.viewState,
             // transitionDuration: 750,
