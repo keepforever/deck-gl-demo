@@ -1,0 +1,12 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#133505",
+    "titleBar.activeBackground": "#1B4A06",
+    "titleBar.activeForeground": "#F3FEEF"
+  },
+  "search.exclude": {
+    "**/*.cache": true,
+    "**/*build": true
+  },
+  "cSpell.words": ["pickable"]
+}
