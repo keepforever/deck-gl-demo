@@ -23,17 +23,19 @@ export function links() {
 
 type Props = {};
 
+const initialViewState = {
+  latitude: 45.164,
+  longitude: 14.621,
+  zoom: 1.022,
+  bearing: 0,
+};
+
 const HomePage: React.FC<Props> = (props) => {
-  const [viewState, setViewState] = useState<any>(() => ({
-    latitude: 15.623,
-    longitude: -11.306,
-    zoom: 1.25,
-    bearing: 0,
-    // transitionDuration: 8000,
-    // transitionInterpolator: new FlyToInterpolator(),
-  }));
   const [isShowPopover, setIsShowPopover] = useState(false);
-  console.log("\n", `viewState = `, viewState, "\n");
+  const [viewState, setViewState] = useState<any>(() => ({
+    ...initialViewState,
+  }));
+  // console.log("\n", `viewState = `, viewState, "\n");
 
   const jurisdictions = jurisdictionsPayload
     .filter((j) => j.code !== "default")
@@ -73,6 +75,7 @@ const HomePage: React.FC<Props> = (props) => {
         return shouldFill ? (shouldFill.color as RGBAColor) : [152, 11, 238, 0];
       },
       onClick: (info: any) => {
+        // TODO:BAC - determine if clicked area is a jurisdiction, if so, zoom and show drawer, otherwise do nothing
         console.log(`onClick info = `, info, "\n");
         const centroid = findCentroid(info?.object?.geometry);
         setViewState({
@@ -149,10 +152,7 @@ const HomePage: React.FC<Props> = (props) => {
           <button
             onClick={() => {
               setViewState({
-                latitude: 15.623,
-                longitude: -11.306,
-                zoom: 1.25,
-                bearing: 0,
+                ...initialViewState,
                 transitionDuration: 750,
                 transitionInterpolator: new FlyToInterpolator(),
               });
