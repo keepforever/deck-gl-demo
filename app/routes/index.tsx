@@ -31,12 +31,12 @@ const initialViewState = {
 };
 
 const HomePage: React.FC<Props> = (props) => {
+  const [hoverInfo, setHoverInfo] = useState<any>(null);
   const [isShowPopover, setIsShowPopover] = useState(false);
   const [viewState, setViewState] = useState<any>(() => ({
     ...initialViewState,
   }));
   // console.log("\n", `viewState = `, viewState, "\n");
-
   const jurisdictions = jurisdictionsPayload
     .filter((j) => j.code !== "default")
     .map((jurisdiction) => {
@@ -63,12 +63,21 @@ const HomePage: React.FC<Props> = (props) => {
       parameters: {
         depthTest: false,
       },
-      getFillColor: (args: any) => {
+      onHover: (info: any) => {
+        // console.log("\n", `info = `, info, "\n");
         const shouldFill = jurisdictions.find((jurisdiction) =>
-          jurisdiction.regionCodes.includes(args.id)
+          jurisdiction.regionCodes.includes(info?.object?.id)
+        );
+        shouldFill && setHoverInfo(info);
+        !shouldFill && setHoverInfo(null);
+      },
+      getFillColor: (polygon: any) => {
+        // console.log("\n", `GET_FILL_COLOR polygon = `, polygon, "\n");
+        const shouldFill = jurisdictions.find((jurisdiction) =>
+          jurisdiction.regionCodes.includes(polygon.id)
         );
         // if (shouldFill) {
-        //   console.log("\n", `args = `, args, "\n");
+        // console.log("\n", `polygon = `, polygon, "\n");
         //   console.log("\n", `jurisdictions = `, jurisdictions, "\n");
         //   console.log("\n", `shouldFill = `, shouldFill, "\n");
         // }
@@ -76,7 +85,7 @@ const HomePage: React.FC<Props> = (props) => {
       },
       onClick: (info: any) => {
         // TODO:BAC - determine if clicked area is a jurisdiction, if so, zoom and show drawer, otherwise do nothing
-        console.log(`onClick info = `, info, "\n");
+        // console.log(`onClick info = `, info, "\n");
         const centroid = findCentroid(info?.object?.geometry);
         setViewState({
           // longitude: info.coordinate?.[0] as number,
@@ -173,6 +182,25 @@ const HomePage: React.FC<Props> = (props) => {
         }}
         controller={true}
         layers={layers}
+        // getTooltip={(polygon: any) => {
+        //   // const shouldFill = jurisdictions.find((jurisdiction) =>
+        //   //   jurisdiction.regionCodes.includes(polygon.object.id)
+        //   // );
+        //   // console.log("\n", `GET_TOOL_TIP polygon = `, polygon, "\n");
+        //   // console.log("\n", `polygon.object = `, polygon.object, "\n");
+        //   return (
+        //     polygon.object && {
+        //       html: `<p>${polygon.object.properties.name}</p>`,
+        //       style: {
+        //         color: "white",
+        //         backgroundColor: "black",
+        //         fontSize: "0.8em",
+        //         padding: 0,
+        //         margin: 0,
+        //       },
+        //     }
+        //   );
+        // }}
         style={{
           flex: 1,
           position: "relative",
@@ -181,7 +209,27 @@ const HomePage: React.FC<Props> = (props) => {
           border: "5px solid red",
           // backgroundColor: "powderblue",
         }}
-      />
+      >
+        {/* Tooltip */}
+        {hoverInfo?.object && (
+          <div
+            style={{
+              background: "blue",
+              color: "white",
+              padding: "0.25em 0.5em",
+              borderRadius: 50,
+              fontSize: "0.8em",
+              position: "absolute",
+              zIndex: 1,
+              pointerEvents: "none",
+              left: hoverInfo.x,
+              top: hoverInfo.y,
+            }}
+          >
+            {hoverInfo?.object?.properties?.name}
+          </div>
+        )}
+      </DeckGL>
     </Container>
   );
 };
