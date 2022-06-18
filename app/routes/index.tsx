@@ -6,10 +6,8 @@ import { GeoJsonLayer, ArcLayer } from "@deck.gl/layers";
 
 import globalStyles from "~/styles/global.css";
 import { worldMapFeatures } from "~/constants/worldMapFeatures";
-import roadsJson from "~/constants/roads.json";
 import { Container } from "~/components/MapContainer";
 import { jurisdictionsPayload } from "~/constants/jurisdictionsPayload";
-import { transformedWorldMapFeatures } from "~/constants/transformedWorldMapFeatures";
 import { faker } from "@faker-js/faker";
 
 export function links() {
@@ -69,11 +67,13 @@ const HomePage: React.FC<Props> = (props) => {
       },
       onClick: (info: any) => {
         console.log(`onClick info = `, info, "\n");
-        const centroid = findCentroid(info?.object?.geometry?.coordinates);
+        const centroid = findCentroid(info?.object?.geometry);
         console.log(`centroid = `, centroid, "\n");
         setViewState({
-          longitude: info.coordinate?.[0] as number,
-          latitude: info.coordinate?.[1] as number,
+          // longitude: info.coordinate?.[0] as number,
+          longitude: centroid?.[0] || (info.coordinate?.[0] as number),
+          // latitude: info.coordinate?.[1] as number,
+          latitude: centroid?.[1] || (info.coordinate?.[1] as number),
           zoom: 3,
           transitionDuration: 750,
           transitionInterpolator: new FlyToInterpolator(),
@@ -151,10 +151,31 @@ const HomePage: React.FC<Props> = (props) => {
 };
 
 export default HomePage;
-const findCentroid = (arr: any) => {
-  let x = arr.map((xy: any) => xy[0]);
-  let y = arr.map((xy: any) => xy[1]);
+const findCentroid = (geometry: any) => {
+  let coords: any[] = [];
+  if (geometry.type === "MultiPolygon") {
+    geometry.coordinates.forEach((polygon: any) => {
+      polygon.forEach((coordinate: any) => {
+        coordinate.forEach((c: any) => {
+          // console.log("\n", `c = `, c, "\n");
+          coords.push(c);
+        });
+      });
+    });
+  }
+  if (geometry.type === "Polygon") {
+    geometry.coordinates.forEach((coordinate: any) => {
+      coordinate.forEach((c: any) => {
+        coords.push(c);
+      });
+    });
+  }
+  console.log("\n", `coords = `, coords, "\n");
+  let x = coords.map((xy: any) => xy[0]);
+  let y = coords.map((xy: any) => xy[1]);
   let cx = (Math.min(...x) + Math.max(...x)) / 2;
   let cy = (Math.min(...y) + Math.max(...y)) / 2;
-  return [cx, cy];
+  const payload = [cx, cy];
+  console.log("\n", `payload = `, payload, "\n");
+  return payload;
 };
