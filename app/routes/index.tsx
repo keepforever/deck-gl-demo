@@ -8,10 +8,17 @@ import globalStyles from "~/styles/global.css";
 import { worldMapFeatures } from "~/constants/worldMapFeatures";
 import { Container } from "~/components/MapContainer";
 import { jurisdictionsPayload } from "~/constants/jurisdictionsPayload";
+import { findCentroid } from "~/utils/findCentroid";
 import { faker } from "@faker-js/faker";
 
+import Drawer from "react-modern-drawer";
+import drawerStyles from "react-modern-drawer/dist/index.css";
+
 export function links() {
-  return [{ rel: "stylesheet", href: globalStyles }];
+  return [
+    { rel: "stylesheet", href: globalStyles },
+    { rel: "stylesheet", href: drawerStyles },
+  ];
 }
 
 type Props = {};
@@ -25,6 +32,8 @@ const HomePage: React.FC<Props> = (props) => {
     // transitionDuration: 8000,
     // transitionInterpolator: new FlyToInterpolator(),
   }));
+  const [isShowPopover, setIsShowPopover] = useState(false);
+  console.log("\n", `viewState = `, viewState, "\n");
 
   const jurisdictions = jurisdictionsPayload
     .filter((j) => j.code !== "default")
@@ -56,28 +65,27 @@ const HomePage: React.FC<Props> = (props) => {
         const shouldFill = jurisdictions.find((jurisdiction) =>
           jurisdiction.regionCodes.includes(args.id)
         );
-
-        if (shouldFill) {
-          console.log("\n", `args = `, args, "\n");
-          console.log("\n", `jurisdictions = `, jurisdictions, "\n");
-          console.log("\n", `shouldFill = `, shouldFill, "\n");
-        }
-
+        // if (shouldFill) {
+        //   console.log("\n", `args = `, args, "\n");
+        //   console.log("\n", `jurisdictions = `, jurisdictions, "\n");
+        //   console.log("\n", `shouldFill = `, shouldFill, "\n");
+        // }
         return shouldFill ? (shouldFill.color as RGBAColor) : [152, 11, 238, 0];
       },
       onClick: (info: any) => {
         console.log(`onClick info = `, info, "\n");
         const centroid = findCentroid(info?.object?.geometry);
-        console.log(`centroid = `, centroid, "\n");
         setViewState({
           // longitude: info.coordinate?.[0] as number,
-          longitude: centroid?.[0] || (info.coordinate?.[0] as number),
+          longitude:
+            (centroid?.[0] as number) + 25 || (info.coordinate?.[0] as number),
           // latitude: info.coordinate?.[1] as number,
           latitude: centroid?.[1] || (info.coordinate?.[1] as number),
           zoom: 3,
           transitionDuration: 750,
           transitionInterpolator: new FlyToInterpolator(),
         });
+        setIsShowPopover(true);
       },
     }),
     // new GeoJsonLayer({
@@ -118,21 +126,49 @@ const HomePage: React.FC<Props> = (props) => {
   ];
   return (
     <Container>
-      <DeckGL
-        initialViewState={{
-          latitude: 15.623,
-          longitude: -11.306,
-          zoom: 5,
-          pitch: 0,
-          bearing: 0,
+      <Drawer
+        open={isShowPopover}
+        enableOverlay={false}
+        size={700}
+        onClose={() => {
+          setViewState({
+            latitude: 15.623,
+            longitude: -11.306,
+            zoom: 5,
+            pitch: 0,
+            bearing: 0,
+          });
+
+          setIsShowPopover(false);
         }}
+        direction="right"
+        className="drawer"
+      >
+        <div style={{ color: "black" }}>
+          <h1>{`${viewState.latitude} ${viewState.longitude}`}</h1>
+          <button
+            onClick={() => {
+              setViewState({
+                latitude: 15.623,
+                longitude: -11.306,
+                zoom: 1.25,
+                bearing: 0,
+                transitionDuration: 750,
+                transitionInterpolator: new FlyToInterpolator(),
+              });
+              setIsShowPopover(false);
+            }}
+          >
+            hide
+          </button>
+        </div>
+      </Drawer>
+
+      <DeckGL
         viewState={viewState}
         onViewStateChange={(e: any) => {
-          // console.log("\n", `e.viewState = `, e.viewState, "\n");
           setViewState({
             ...e.viewState,
-            // transitionDuration: 750,
-            // transitionInterpolator: new FlyToInterpolator(),
           });
         }}
         controller={true}
@@ -151,31 +187,3 @@ const HomePage: React.FC<Props> = (props) => {
 };
 
 export default HomePage;
-const findCentroid = (geometry: any) => {
-  let coords: any[] = [];
-  if (geometry.type === "MultiPolygon") {
-    geometry.coordinates.forEach((polygon: any) => {
-      polygon.forEach((coordinate: any) => {
-        coordinate.forEach((c: any) => {
-          // console.log("\n", `c = `, c, "\n");
-          coords.push(c);
-        });
-      });
-    });
-  }
-  if (geometry.type === "Polygon") {
-    geometry.coordinates.forEach((coordinate: any) => {
-      coordinate.forEach((c: any) => {
-        coords.push(c);
-      });
-    });
-  }
-  console.log("\n", `coords = `, coords, "\n");
-  let x = coords.map((xy: any) => xy[0]);
-  let y = coords.map((xy: any) => xy[1]);
-  let cx = (Math.min(...x) + Math.max(...x)) / 2;
-  let cy = (Math.min(...y) + Math.max(...y)) / 2;
-  const payload = [cx, cy];
-  console.log("\n", `payload = `, payload, "\n");
-  return payload;
-};

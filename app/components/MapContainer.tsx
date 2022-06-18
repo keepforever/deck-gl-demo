@@ -7,11 +7,15 @@ export const Container: any = ({ children }: any) => {
     <div
       style={{
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100vh",
+        maxWidth: 1300,
+        margin: "auto",
       }}
     >
+      {children}
       <div
         style={{
           display: "flex",
@@ -35,7 +39,6 @@ export const Container: any = ({ children }: any) => {
           DECREASE
         </button>
       </div>
-      {children}
     </div>
   );
 };
