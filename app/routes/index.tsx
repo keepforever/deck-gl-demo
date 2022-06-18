@@ -1,13 +1,16 @@
 import { useState } from "react";
 import DeckGL from "@deck.gl/react";
+import type { RGBAColor } from "@deck.gl/core";
+import { FlyToInterpolator } from "@deck.gl/core";
 import { GeoJsonLayer, ArcLayer } from "@deck.gl/layers";
+
 import globalStyles from "~/styles/global.css";
-import { worldMapFeatures } from "~/constants/world";
+import { worldMapFeatures } from "~/constants/worldMapFeatures";
 import roadsJson from "~/constants/roads.json";
 import { Container } from "~/components/MapContainer";
-// import worldBeta from "~/constants/world-geo.json";
-// import { arcLayerData } from "~/constants/arcLayerData";
-import { FlyToInterpolator } from "@deck.gl/core";
+import { jurisdictionsPayload } from "~/constants/jurisdictionsPayload";
+import { transformedWorldMapFeatures } from "~/constants/transformedWorldMapFeatures";
+import { faker } from "@faker-js/faker";
 
 export function links() {
   return [{ rel: "stylesheet", href: globalStyles }];
@@ -24,7 +27,23 @@ const HomePage: React.FC<Props> = (props) => {
     // transitionDuration: 8000,
     // transitionInterpolator: new FlyToInterpolator(),
   }));
-  const layers = [
+
+  const jurisdictions = jurisdictionsPayload
+    .filter((j) => j.code !== "default")
+    .map((jurisdiction) => {
+      return {
+        ...jurisdiction,
+        regionCodes: jurisdiction.regions.map((region) => region.code),
+        color: [
+          faker.datatype.number({ min: 0, max: 255 }),
+          faker.datatype.number({ min: 0, max: 255 }),
+          faker.datatype.number({ min: 0, max: 255 }),
+          100,
+        ],
+      };
+    });
+
+  const layers: any = [
     new GeoJsonLayer({
       id: "geojson",
       data: worldMapFeatures,
@@ -35,28 +54,39 @@ const HomePage: React.FC<Props> = (props) => {
       parameters: {
         depthTest: false,
       },
-      getFillColor: (args) => {
-        // console.log("\n", `args = `, args, "\n");
-        return [152, 11, 238, 50];
+      getFillColor: (args: any) => {
+        const shouldFill = jurisdictions.find((jurisdiction) =>
+          jurisdiction.regionCodes.includes(args.id)
+        );
+
+        if (shouldFill) {
+          console.log("\n", `args = `, args, "\n");
+          console.log("\n", `jurisdictions = `, jurisdictions, "\n");
+          console.log("\n", `shouldFill = `, shouldFill, "\n");
+        }
+
+        return shouldFill ? (shouldFill.color as RGBAColor) : [152, 11, 238, 0];
       },
-      onClick: (info) => {
+      onClick: (info: any) => {
         console.log(`onClick info = `, info, "\n");
+        const centroid = findCentroid(info?.object?.geometry?.coordinates);
+        console.log(`centroid = `, centroid, "\n");
         setViewState({
           longitude: info.coordinate?.[0] as number,
           latitude: info.coordinate?.[1] as number,
-          zoom: 4,
+          zoom: 3,
           transitionDuration: 750,
           transitionInterpolator: new FlyToInterpolator(),
         });
       },
     }),
-    new GeoJsonLayer({
-      id: "geo-json-road-layer",
-      data: roadsJson,
-      stroked: true,
-      getLineColor: [176, 224, 230],
-      lineWidthMinPixels: 2,
-    }),
+    // new GeoJsonLayer({
+    //   id: "geo-json-road-layer",
+    //   data: roadsJson,
+    //   stroked: true,
+    //   getLineColor: [176, 224, 230],
+    //   lineWidthMinPixels: 2,
+    // }),
     new ArcLayer({
       id: "arc-layer",
       data: [
@@ -113,7 +143,7 @@ const HomePage: React.FC<Props> = (props) => {
           height: "100%",
           width: "100%",
           border: "5px solid red",
-          backgroundColor: "powderblue",
+          // backgroundColor: "powderblue",
         }}
       />
     </Container>
@@ -121,3 +151,10 @@ const HomePage: React.FC<Props> = (props) => {
 };
 
 export default HomePage;
+const findCentroid = (arr: any) => {
+  let x = arr.map((xy: any) => xy[0]);
+  let y = arr.map((xy: any) => xy[1]);
+  let cx = (Math.min(...x) + Math.max(...x)) / 2;
+  let cy = (Math.min(...y) + Math.max(...y)) / 2;
+  return [cx, cy];
+};
