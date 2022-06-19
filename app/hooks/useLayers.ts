@@ -74,7 +74,7 @@ export const useLayers = ({
       visible: !isShowPopover,
       id: "arc-layer",
       data: memoizedArchLayerData,
-      pickable: true,
+      pickable: false,
       getWidth: 2,
       lineWidthMinPixels: 1,
       getTilt: -35,
