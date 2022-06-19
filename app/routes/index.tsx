@@ -82,13 +82,18 @@ const HomePage: React.FC<Props> = (props) => {
       </Drawer>
 
       <DeckGL
+        getCursor={() => "auto"}
         viewState={viewState}
         onViewStateChange={(e: any) => {
           setViewState({
             ...e.viewState,
           });
         }}
-        controller={true}
+        controller={{
+          dragPan: false,
+          doubleClickZoom: false,
+          scrollZoom: false,
+        }}
         layers={layers}
         style={{
           flex: 1,
