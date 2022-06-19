@@ -1,12 +1,4 @@
-import * as faker from "@faker-js/faker";
-
-// function to generate random number global lat long coordinates
-const getRandomCoordinates = (): [number, number] => {
-  return [
-    Math.random() * (37.819 - 37.7945) + 37.7945,
-    Math.random() * (-122.41356 - -122.47864) + -122.47864,
-  ];
-};
+import { faker } from "@faker-js/faker";
 
 export type ArchLayerArch = {
   inbound: number;
@@ -21,27 +13,63 @@ export type ArchLayerArch = {
   };
 };
 
-// function to generate arch layer data
+export const staticArcLayerData = [
+  {
+    inbound: 22633, // TODO:BAC - could be any property from the jurisdictions payload
+    from: {
+      name: "19th St. Oakland (19TH)",
+      coordinates: [-102.269029, 40.80787],
+    },
+    to: {
+      name: "12th St. Oakland City Center (12TH)",
+      coordinates: [-122.271604, 37.803664],
+    },
+  },
+  {
+    inbound: 22633,
+    from: {
+      name: "Sudan",
+      coordinates: [32, 15],
+    },
+    to: {
+      name: "CA",
+      coordinates: [-120, 36],
+    },
+  },
+  {
+    inbound: 22633,
+    from: {
+      name: "Sudan",
+      coordinates: [102, 65],
+    },
+    to: {
+      name: "CA",
+      coordinates: [-120, 36],
+    },
+  },
+];
 
-const generateArcLayerData = (num: number): ArchLayerArch[] => {
+export const getRandomArcLayerData = (num: number): any => {
   const data = [];
 
   for (let i = 0; i < num; i++) {
     data.push({
-      inbound: faker.faker.datatype.number({ min: 10000, max: 80000 }),
-      outbound: faker.faker.datatype.number({ min: 10000, max: 80000 }),
+      inbound: 22633,
       from: {
-        name: faker.faker.lorem.sentence(),
-        coordinates: getRandomCoordinates(),
+        name: "19th St. Oakland (19TH)",
+        coordinates: [
+          faker.datatype.number({ min: 30, max: 100 }),
+          faker.datatype.number({ min: 15, max: 56 }),
+        ],
       },
       to: {
-        name: faker.faker.lorem.sentence(),
-        coordinates: getRandomCoordinates(),
+        name: "12th St. Oakland City Center (12TH)",
+        coordinates: [
+          faker.datatype.number({ min: -121, max: -120 }),
+          faker.datatype.number({ min: 36, max: 36.75 }),
+        ],
       },
     });
   }
-
   return data;
 };
-
-export const arcLayerData = generateArcLayerData(5);
