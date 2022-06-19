@@ -41,6 +41,7 @@ const HomePage: React.FC<Props> = (props) => {
     jurisdictions,
     setViewState,
     setIsShowPopover,
+    isShowPopover,
   });
 
   return (
@@ -48,13 +49,20 @@ const HomePage: React.FC<Props> = (props) => {
       <Drawer
         open={isShowPopover}
         enableOverlay={false}
-        size={700}
+        size={600}
         direction="right"
         className="drawer"
       >
-        <div style={{ color: "black" }}>
-          <h1>{`${viewState.latitude} ${viewState.longitude}`}</h1>
+        <div style={{ color: "black", padding: 32 }}>
           <button
+            style={{
+              color: "white",
+              backgroundColor: "black",
+              padding: "8px 12px",
+              fontSize: 20,
+              marginRight: 40,
+              border: "3px solid red",
+            }}
             onClick={() => {
               setViewState({
                 ...initialViewState,
@@ -64,8 +72,12 @@ const HomePage: React.FC<Props> = (props) => {
               setIsShowPopover(false);
             }}
           >
-            hide
+            HIDE
           </button>
+          <code style={{ fontSize: 40 }}>viewState</code>
+          <pre style={{ fontSize: 20 }}>
+            {JSON.stringify(viewState, null, 2) || "nothing to preview"}
+          </pre>
         </div>
       </Drawer>
 

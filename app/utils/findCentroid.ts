@@ -2,7 +2,6 @@ export const findCentroid = (geometry: any) => {
   let coords: any[] = [];
   const isMultiPolygon = geometry.type === "MultiPolygon";
   const isPolygon = geometry.type === "Polygon";
-  console.log("\n", `isMultiPolygon = `, isMultiPolygon, "\n");
   // if (geometry.type === "MultiPolygon") {
   if (isMultiPolygon) {
     geometry.coordinates.forEach((polygon: any) => {

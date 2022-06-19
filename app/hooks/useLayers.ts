@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { faker } from "@faker-js/faker";
 import type { RGBAColor } from "@deck.gl/core";
 import { FlyToInterpolator } from "@deck.gl/core";
@@ -15,7 +16,13 @@ export const useLayers = ({
   jurisdictions,
   setViewState,
   setIsShowPopover,
+  isShowPopover,
 }: any) => {
+  // momoized arc layer data
+  const memoizedArchLayerData = useMemo(() => {
+    return [...staticArcLayerData, ...getRandomArcLayerData(6)];
+  }, []);
+
   const layers: any = [
     new GeoJsonLayer({
       id: "geojson",
@@ -64,13 +71,14 @@ export const useLayers = ({
       },
     }),
     new ArcLayer({
+      visible: !isShowPopover,
       id: "arc-layer",
-      data: [...staticArcLayerData, ...getRandomArcLayerData(6)],
+      data: memoizedArchLayerData,
       pickable: true,
       getWidth: 2,
       lineWidthMinPixels: 1,
       getTilt: -35,
-      getHeight: 1,
+      getHeight: 0.75,
       getSourcePosition: (d: any) => d?.from.coordinates,
       getTargetPosition: (d: any) => d?.to.coordinates,
       getSourceColor: (d: any) => [
