@@ -17,5 +17,6 @@ export const useJurisdictions = (jurisdictionsPayload: any) => {
       };
     });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => jurisdictions, []);
 };
