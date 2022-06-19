@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
+import { useMemo } from "react";
 
 export const useJurisdictions = (jurisdictionsPayload: any) => {
-  return jurisdictionsPayload
+  const jurisdictions = jurisdictionsPayload
     .filter((j: any) => j.code !== "default")
     .map((jurisdiction: any) => {
       return {
@@ -11,8 +12,10 @@ export const useJurisdictions = (jurisdictionsPayload: any) => {
           faker.datatype.number({ min: 0, max: 255 }),
           faker.datatype.number({ min: 0, max: 255 }),
           faker.datatype.number({ min: 0, max: 255 }),
-          100,
+          faker.datatype.number({ min: 25, max: 130 }),
         ],
       };
     });
+
+  return useMemo(() => jurisdictions, []);
 };
